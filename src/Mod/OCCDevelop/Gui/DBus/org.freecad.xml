@@ -1,0 +1,17 @@
+ <!DOCTYPE node PUBLIC "-//freedesktop//DTD D-BUS Object Introspection 1.0//EN"
+ "http://www.freedesktop.org/standards/dbus/1.0/introspect.dtd">
+ <node>
+   <interface name="org.freecad">
+     <method name="newDocument">
+       <arg name="docName" type="s" direction="in"/>
+     </method>
+     <method name="addBrep">
+       <arg name="objectName" type="s" direction="in"/>
+       <arg name="data" type="s" direction="in"/>
+     </method>
+     <method name="disectBrep">
+       <arg name="objectName" type="s" direction="in"/>
+       <arg name="data" type="s" direction="in"/>
+     </method>
+   </interface>
+ </node>
