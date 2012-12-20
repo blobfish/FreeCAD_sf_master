@@ -35,6 +35,11 @@
 #include <Gui/Command.h>
 #include <Gui/Selection.h>
 #include <TopoDS_Shape.hxx>
+#include <TopoDS.hxx>
+#include <Geom_Surface.hxx>
+#include <GeomAdaptor_Surface.hxx>
+#include <BRepTools.hxx>
+#include <BRep_Tool.hxx>
 #include "DisectBrep.h"
 
 
@@ -101,9 +106,54 @@ void CmdOCCDevelopDisect::activated(int iMsg)
     DisectBrep::disectBrepRecursive(group, shape, TopoDS_Shape(), 1);
 }
 
+DEF_STD_CMD(CmdOCCDevelopInfo);
+CmdOCCDevelopInfo::CmdOCCDevelopInfo()
+  :Command("OCCDevelop_Info")
+{
+    sAppModule    = "OCCDevelop";
+    sGroup        = QT_TR_NOOP("OCCDevelop");
+    sMenuText     = QT_TR_NOOP("Info");
+    sToolTipText  = QT_TR_NOOP("OCCDevelop Info function");
+    sWhatsThis    = QT_TR_NOOP("OCCDevelop Info function");
+    sStatusTip    = QT_TR_NOOP("OCCDevelop Info function");
+    sPixmap       = "Test1";
+//    sAccel        = "CTRL+H";
+}
+
+void CmdOCCDevelopInfo::activated(int iMsg)
+{
+    std::vector<Gui::SelectionSingleton::SelObj> objects = Gui::SelectionSingleton::instance().getSelection();
+    if (objects.empty())
+        return;
+
+    Part::Feature *feature = dynamic_cast<Part::Feature *>(objects.at(0).pObject);
+    if (!feature)
+        return;
+
+    TopoDS_Shape shape = feature->Shape.getValue();
+    if (strlen(objects.at(0).SubName) > 0)
+        shape = feature->Shape.getShape().getSubShape(objects.at(0).SubName);
+
+    if (shape.IsNull())
+        return;
+
+    if (shape.ShapeType() == TopAbs_FACE)
+    {
+        static std::vector<std::string> surfaceNames({"Plane", "Cylinder", "Cone", "Sphere", "Torus", "Bezier",
+                                                      "BSpline", "Surface Of Revolution", "Surface Of Extrusion",
+                                                      "Offset Surface", "Other Surface"});
+        Handle(Geom_Surface) surface = BRep_Tool::Surface(TopoDS::Face(shape));
+        GeomAdaptor_Surface surfaceTest(surface);
+        Base::Console().Message(surfaceNames.at(static_cast<int>(surfaceTest.GetType())).c_str());
+        Base::Console().Message("\n");
+    }
+
+}
+
 void CreateOCCDevelopCommands(void)
 {
     Gui::CommandManager &rcCmdMgr = Gui::Application::Instance->commandManager();
     rcCmdMgr.addCommand(new CmdOCCDevelopTest());
     rcCmdMgr.addCommand(new CmdOCCDevelopDisect());
+    rcCmdMgr.addCommand(new CmdOCCDevelopInfo());
 }
