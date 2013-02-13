@@ -1,7 +1,0 @@
-http://www.developer.nokia.com/Community/Wiki/QtDbus_quick_tutorial
-
-client:
-qdbusxml2cpp -v -c FreecadDBusClient -p dbusclient.h:dbusclient.cpp org.freecad.xml
-
-server:
-qdbusxml2cpp -c FreecadDBusServer -a dbusserver.h:dbusserver.cpp org.freecad.xml
