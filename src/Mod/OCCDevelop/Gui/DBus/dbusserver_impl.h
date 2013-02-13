@@ -15,7 +15,7 @@ public:
     static void startServer(QObject *parent);
 
 public Q_SLOTS:
-    void addBrep(const QString &objectName, const QString &data);
+    void addBrep(const QString &docname, const QString &objectname, const QString &data);
     void newDocument(const QString &docName);
     void disectBrep(const QString &objectName, const QString &data);
 

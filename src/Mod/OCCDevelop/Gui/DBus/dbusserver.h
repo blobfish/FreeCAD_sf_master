@@ -9,8 +9,8 @@
  * before re-generating it.
  */
 
-#ifndef DBUSSERVER_H_1355016641
-#define DBUSSERVER_H_1355016641
+#ifndef DBUSSERVER_H_1360769673
+#define DBUSSERVER_H_1360769673
 
 #include <QtCore/QObject>
 #include <QtDBus/QtDBus>
@@ -31,14 +31,11 @@ class FreecadDBusServer: public QDBusAbstractAdaptor
     Q_CLASSINFO("D-Bus Introspection", ""
 "  <interface name=\"org.freecad\">\n"
 "    <method name=\"newDocument\">\n"
-"      <arg direction=\"in\" type=\"s\" name=\"docName\"/>\n"
+"      <arg direction=\"in\" type=\"s\" name=\"docname\"/>\n"
 "    </method>\n"
 "    <method name=\"addBrep\">\n"
-"      <arg direction=\"in\" type=\"s\" name=\"objectName\"/>\n"
-"      <arg direction=\"in\" type=\"s\" name=\"data\"/>\n"
-"    </method>\n"
-"    <method name=\"disectBrep\">\n"
-"      <arg direction=\"in\" type=\"s\" name=\"objectName\"/>\n"
+"      <arg direction=\"in\" type=\"s\" name=\"docname\"/>\n"
+"      <arg direction=\"in\" type=\"s\" name=\"objectname\"/>\n"
 "      <arg direction=\"in\" type=\"s\" name=\"data\"/>\n"
 "    </method>\n"
 "  </interface>\n"
@@ -49,9 +46,8 @@ public:
 
 public: // PROPERTIES
 public Q_SLOTS: // METHODS
-    void addBrep(const QString &objectName, const QString &data);
-    void disectBrep(const QString &objectName, const QString &data);
-    void newDocument(const QString &docName);
+    void addBrep(const QString &docname, const QString &objectname, const QString &data);
+    void newDocument(const QString &docname);
 Q_SIGNALS: // SIGNALS
 };
 

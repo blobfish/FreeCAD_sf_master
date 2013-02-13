@@ -31,15 +31,22 @@ void DBusServerImpl::startServer(QObject *parent)
     ret = connection.registerObject(QString::fromLatin1("/"), server);
 }
 
-void DBusServerImpl::addBrep(const QString &objectname, const QString &data)
+void DBusServerImpl::addBrep(const QString &docname, const QString &objectname, const QString &data)
 {
     Part::TopoShape shape = shapeFromString(data);
 
-    App::Document *currentDoc = App::GetApplication().getActiveDocument();
+    App::Document *currentDoc;
+    if (docname.isEmpty())
+        currentDoc = App::GetApplication().getActiveDocument();
+    else
+        currentDoc = App::GetApplication().getDocument(docname.toLatin1().data());
     if (!currentDoc)
         return;
+
     Part::Feature *object = static_cast<Part::Feature *>
             (currentDoc->addObject("Part::Feature", objectname.toAscii().data()));
+    if (!object)
+        return;
     object->Shape.setValue(shape);
     currentDoc->recompute();
 }

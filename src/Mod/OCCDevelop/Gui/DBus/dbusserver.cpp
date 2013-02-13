@@ -33,21 +33,15 @@ FreecadDBusServer::~FreecadDBusServer()
     // destructor
 }
 
-void FreecadDBusServer::addBrep(const QString &objectName, const QString &data)
+void FreecadDBusServer::addBrep(const QString &docname, const QString &objectname, const QString &data)
 {
     // handle method call org.freecad.addBrep
-    QMetaObject::invokeMethod(parent(), "addBrep", Q_ARG(QString, objectName), Q_ARG(QString, data));
+    QMetaObject::invokeMethod(parent(), "addBrep", Q_ARG(QString, docname), Q_ARG(QString, objectname), Q_ARG(QString, data));
 }
 
-void FreecadDBusServer::disectBrep(const QString &objectName, const QString &data)
-{
-    // handle method call org.freecad.disectBrep
-    QMetaObject::invokeMethod(parent(), "disectBrep", Q_ARG(QString, objectName), Q_ARG(QString, data));
-}
-
-void FreecadDBusServer::newDocument(const QString &docName)
+void FreecadDBusServer::newDocument(const QString &docname)
 {
     // handle method call org.freecad.newDocument
-    QMetaObject::invokeMethod(parent(), "newDocument", Q_ARG(QString, docName));
+    QMetaObject::invokeMethod(parent(), "newDocument", Q_ARG(QString, docname));
 }
 
