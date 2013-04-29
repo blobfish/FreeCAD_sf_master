@@ -40,7 +40,7 @@ elseif(MINGW)
 else(MSVC)
     set_target_properties(OCCDevelop PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/Mod/OCCDevelop)
     set_target_properties(OCCDevelop PROPERTIES PREFIX "")
-    set_target_properties(Fem PROPERTIES INSTALL_RPATH ${INSTALL_RPATH})
+    #set_target_properties(Fem PROPERTIES INSTALL_RPATH ${INSTALL_RPATH})
 endif(MSVC)
 
 install(TARGETS OCCDevelop DESTINATION lib)
