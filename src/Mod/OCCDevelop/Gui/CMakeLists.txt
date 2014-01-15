@@ -42,6 +42,8 @@ SET(OCCDevelopGui_SRCS
     DBus/dbusserver_impl.cpp
     DisectBrep.h
     DisectBrep.cpp
+    VisualizePCurves.h
+    VisualizePCurves.cpp
 )
 
 add_library(OCCDevelopGui SHARED ${OCCDevelopGui_SRCS})

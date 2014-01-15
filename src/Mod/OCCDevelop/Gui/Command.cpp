@@ -41,6 +41,7 @@
 #include <BRepTools.hxx>
 #include <BRep_Tool.hxx>
 #include "DisectBrep.h"
+#include "VisualizePCurves.h"
 
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -150,10 +151,48 @@ void CmdOCCDevelopInfo::activated(int iMsg)
 
 }
 
+DEF_STD_CMD(CmdOCCDevelopVisualizePCurves);
+CmdOCCDevelopVisualizePCurves::CmdOCCDevelopVisualizePCurves()
+  :Command("OCCDevelop_VisualizePCurves")
+{
+    sAppModule    = "OCCDevelop";
+    sGroup        = QT_TR_NOOP("OCCDevelop");
+    sMenuText     = QT_TR_NOOP("Visualize PCurves");
+    sToolTipText  = QT_TR_NOOP("Visualize PCurves");
+    sWhatsThis    = QT_TR_NOOP("Visualize PCurves");
+    sStatusTip    = QT_TR_NOOP("Visualize PCurves");
+    sPixmap       = "Test1";
+//    sAccel        = "CTRL+H";
+}
+
+void CmdOCCDevelopVisualizePCurves::activated(int iMsg)
+{
+    std::vector<Gui::SelectionSingleton::SelObj> objects = Gui::SelectionSingleton::instance().getSelection();
+    if (objects.empty())
+        return;
+
+    Part::Feature *feature = dynamic_cast<Part::Feature *>(objects.at(0).pObject);
+    if (!feature)
+        return;
+
+    TopoDS_Shape shape = feature->Shape.getValue();
+    if (strlen(objects.at(0).SubName) > 0)
+        shape = feature->Shape.getShape().getSubShape(objects.at(0).SubName);
+
+    if (shape.IsNull())
+        return;
+
+    if (shape.ShapeType() == TopAbs_FACE)
+    {
+        OCCDevelop::VisualizePCurves(TopoDS::Face(shape));
+    }
+}
+
 void CreateOCCDevelopCommands(void)
 {
     Gui::CommandManager &rcCmdMgr = Gui::Application::Instance->commandManager();
     rcCmdMgr.addCommand(new CmdOCCDevelopTest());
     rcCmdMgr.addCommand(new CmdOCCDevelopDisect());
     rcCmdMgr.addCommand(new CmdOCCDevelopInfo());
+    rcCmdMgr.addCommand(new CmdOCCDevelopVisualizePCurves());
 }
