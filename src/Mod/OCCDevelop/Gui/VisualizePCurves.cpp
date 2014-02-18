@@ -24,6 +24,7 @@
 #include <TopExp_Explorer.hxx>
 #include <BRep_Tool.hxx>
 #include <BRepBuilderAPI_MakeEdge2d.hxx>
+#include <BRepLib.hxx>
 
 #include <Base/Console.h>
 #include <App/Application.h>
@@ -54,6 +55,7 @@ void OCCDevelop::VisualizePCurves(const TopoDS_Face& faceIn)
     Handle_Geom2d_Curve pCurve = BRep_Tool::CurveOnSurface(TopoDS::Edge(faceIt.Current()), faceIn, pFirst, pLast);
     
     TopoDS_Edge edgePCurve = BRepBuilderAPI_MakeEdge2d(pCurve, pFirst, pLast);
+    BRepLib::BuildCurve3d(edgePCurve);
     
     Part::Feature *object = static_cast<Part::Feature *>
                 (group->addObject("Part::Feature", stream.str().c_str()));
