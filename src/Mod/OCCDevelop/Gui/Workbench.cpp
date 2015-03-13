@@ -51,7 +51,12 @@ Gui::MenuItem* Workbench::setupMenuBar() const
     Gui::MenuItem* subMenu = new Gui::MenuItem;
     root->insertItem(item, subMenu);
     subMenu->setCommand("OCCDevelop");
-    *subMenu << "OCCDevelop_Test" << "OCCDevelop_Disect" << "OCCDevelop_Info" << "OCCDevelop_VisualizePCurves";
+    *subMenu
+      << "OCCDevelop_Test"
+      << "OCCDevelop_Disect"
+      << "OCCDevelop_Info"
+      << "OCCDevelop_VisualizePCurves"
+      << "OCCDevelop_BOPAlgo";
 
     return root;
 }
@@ -62,7 +67,12 @@ Gui::ToolBarItem* Workbench::setupToolBars() const
 
     Gui::ToolBarItem* subBar = new Gui::ToolBarItem(root);
     subBar->setCommand( "OCCDevelop Tools" );
-    *subBar << "OCCDevelop_Test" << "OCCDevelop_Disect" << "OCCDevelop_Info" << "OCCDevelop_VisualizePCurves";
+    *subBar
+      << "OCCDevelop_Test"
+      << "OCCDevelop_Disect"
+      << "OCCDevelop_Info"
+      << "OCCDevelop_VisualizePCurves"
+      << "OCCDevelop_BOPAlgo";
 
     return root;
 }

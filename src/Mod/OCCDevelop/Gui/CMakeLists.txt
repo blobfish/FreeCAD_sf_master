@@ -44,6 +44,8 @@ SET(OCCDevelopGui_SRCS
     DisectBrep.cpp
     VisualizePCurves.h
     VisualizePCurves.cpp
+    BOPAlgo.cpp
+    BOPAlgo.h
 )
 
 add_library(OCCDevelopGui SHARED ${OCCDevelopGui_SRCS})

@@ -42,6 +42,7 @@
 #include <BRep_Tool.hxx>
 #include "DisectBrep.h"
 #include "VisualizePCurves.h"
+#include "BOPAlgo.h"
 
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -188,6 +189,43 @@ void CmdOCCDevelopVisualizePCurves::activated(int iMsg)
     }
 }
 
+DEF_STD_CMD(CmdOCCDevelopBOPAlgo);
+CmdOCCDevelopBOPAlgo::CmdOCCDevelopBOPAlgo()
+  :Command("OCCDevelop_BOPAlgo")
+{
+    sAppModule    = "OCCDevelop";
+    sGroup        = QT_TR_NOOP("OCCDevelop");
+    sMenuText     = QT_TR_NOOP("BOPAlgo");
+    sToolTipText  = QT_TR_NOOP("BOPAlgo");
+    sWhatsThis    = QT_TR_NOOP("BOPAlgo");
+    sStatusTip    = QT_TR_NOOP("BOPAlgo");
+    sPixmap       = "Test1";
+//    sAccel        = "CTRL+H";
+}
+
+void CmdOCCDevelopBOPAlgo::activated(int iMsg)
+{
+    std::vector<Gui::SelectionSingleton::SelObj> objects = Gui::SelectionSingleton::instance().getSelection();
+    if (objects.size() < 2)
+        return;
+
+    Part::Feature *feature1 = dynamic_cast<Part::Feature *>(objects.at(0).pObject);
+    assert(feature1);
+    TopoDS_Shape shape1 = feature1->Shape.getValue();
+    if (strlen(objects.at(0).SubName) > 0)
+        shape1 = feature1->Shape.getShape().getSubShape(objects.at(0).SubName);
+    assert(!shape1.IsNull());
+    
+    Part::Feature *feature2 = dynamic_cast<Part::Feature *>(objects.at(1).pObject);
+    assert(feature2);
+    TopoDS_Shape shape2 = feature2->Shape.getValue();
+    if (strlen(objects.at(1).SubName) > 0)
+      shape2 = feature2->Shape.getShape().getSubShape(objects.at(1).SubName);
+    assert(!shape2.IsNull());
+    
+    OCCDevelop::BOPAlgo(shape1, shape2);
+}
+
 void CreateOCCDevelopCommands(void)
 {
     Gui::CommandManager &rcCmdMgr = Gui::Application::Instance->commandManager();
@@ -195,4 +233,5 @@ void CreateOCCDevelopCommands(void)
     rcCmdMgr.addCommand(new CmdOCCDevelopDisect());
     rcCmdMgr.addCommand(new CmdOCCDevelopInfo());
     rcCmdMgr.addCommand(new CmdOCCDevelopVisualizePCurves());
+    rcCmdMgr.addCommand(new CmdOCCDevelopBOPAlgo());
 }
