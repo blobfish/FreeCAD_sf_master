@@ -548,6 +548,8 @@ Thickness::Thickness()
     Mode.setEnums(ModeEnums);
     ADD_PROPERTY_TYPE(Join,(long(0)),"Thickness",App::Prop_None,"Join type");
     Join.setEnums(JoinEnums);
+    ADD_PROPERTY_TYPE(Intersection, (false), "Thickness", App::Prop_None, "See OCC doc");
+    ADD_PROPERTY_TYPE(SelfIntersection, (false), "Thickness", App::Prop_None, "See OCC doc");
 }
 
 short Thickness::mustExecute() const
