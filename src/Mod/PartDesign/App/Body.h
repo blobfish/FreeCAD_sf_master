@@ -81,9 +81,28 @@ public:
     /// Add the feature into the body at the current insert point (Tip feature)
     void addFeature(App::DocumentObject* feature);
 
+    /**
+	 * Insert the feature into the body after the given feature.
+	 *
+	 * @param feature  The feature to insert into the body
+	 * @param after    The feature after the given one should be inserted.
+	 *                 If after is NULL than insert to the begin of the body.
+	 * @note the methode doesn't modifies the Tip
+	 */
+    void insertFeatureAfter(App::DocumentObject* feature, App::DocumentObject* after);
+
+    /**
+	 * Insert the feature into the body before the given feature.
+	 *
+	 * @param feature  The feature to insert into the body
+	 * @param before   The feature before the given one should be inserted.
+	 *                 If before is NULL than insert to the end of feature list.
+	 */
+    void insertFeatureBefore(App::DocumentObject* feature, App::DocumentObject* before);
+
     /// Remove the feature from the body
     void removeFeature(App::DocumentObject* feature);
-    
+
     /// Checks if the given document object is a feaure of this body
     bool isFeature(App::DocumentObject* feature);
 
@@ -107,6 +126,10 @@ public:
     Base::BoundBox3d getBoundBox();
 
     PyObject *getPyObject(void);
+
+private:
+	/// A common code for add/insertFeature functions
+	void setupInsertedFeature(App::DocumentObject* feature);
 
 private:
     App::DocumentObject* rememberTip;
