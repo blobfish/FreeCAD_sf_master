@@ -35,11 +35,11 @@ class ViewProviderDocumentObject;
 }
 
 namespace PartDesign {
-	class Body;
+    class Body;
 }
 
 namespace App {
-	class Part;
+    class Part;
 }
 
 namespace Sketcher {
@@ -115,4 +115,4 @@ private:
 } // namespace PartDesignGui
 
 
-#endif // PARTDESIGN_WORKBENCH_H 
+#endif // PARTDESIGN_WORKBENCH_H

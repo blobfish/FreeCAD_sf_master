@@ -48,7 +48,7 @@ public:
     //@{
     /// recalculate the feature
     App::DocumentObjectExecReturn *execute(void);
-    short mustExecute() const;    
+    short mustExecute() const;
     /// returns the type name of the view provider
     const char* getViewProviderName(void) const {
         return "PartDesignGui::ViewProviderBody";
@@ -82,22 +82,22 @@ public:
     void addFeature(App::DocumentObject* feature);
 
     /**
-	 * Insert the feature into the body after the given feature.
-	 *
-	 * @param feature  The feature to insert into the body
-	 * @param after    The feature after the given one should be inserted.
-	 *                 If after is NULL than insert to the begin of the body.
-	 * @note the methode doesn't modifies the Tip
-	 */
+     * Insert the feature into the body after the given feature.
+     *
+     * @param feature  The feature to insert into the body
+     * @param after    The feature after the given one should be inserted.
+     *                 If after is NULL than insert to the begin of the body.
+     * @note the methode doesn't modifies the Tip
+     */
     void insertFeatureAfter(App::DocumentObject* feature, App::DocumentObject* after);
 
     /**
-	 * Insert the feature into the body before the given feature.
-	 *
-	 * @param feature  The feature to insert into the body
-	 * @param before   The feature before the given one should be inserted.
-	 *                 If before is NULL than insert to the end of feature list.
-	 */
+     * Insert the feature into the body before the given feature.
+     *
+     * @param feature  The feature to insert into the body
+     * @param before   The feature before the given one should be inserted.
+     *                 If before is NULL than insert to the end of feature list.
+     */
     void insertFeatureBefore(App::DocumentObject* feature, App::DocumentObject* before);
 
     /// Remove the feature from the body
@@ -128,8 +128,8 @@ public:
     PyObject *getPyObject(void);
 
 private:
-	/// A common code for add/insertFeature functions
-	void setupInsertedFeature(App::DocumentObject* feature);
+    /// A common code for add/insertFeature functions
+    void setupInsertedFeature(App::DocumentObject* feature);
 
 private:
     App::DocumentObject* rememberTip;
