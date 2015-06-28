@@ -371,12 +371,17 @@ void CmdPartDesignMoveFeature::activated(int iMsg)
     for (std::vector<App::DocumentObject*>::const_iterator f = features.begin(); f != features.end(); f++) {
         // Find body of this feature
         Part::BodyBase* source = PartDesign::Body::findBodyOf(*f);
-        if (source == target) continue;
-        bool featureIsTip = (source->Tip.getValue() == *f);
+        bool featureIsTip = false;
 
-        // Remove from source body
-        doCommand(Doc,"App.activeDocument().%s.removeFeature(App.activeDocument().%s)",
+        if (source == target) continue;
+
+        // Remove from source body if the feature belongs to a body
+        if (source) {
+            featureIsTip = (source->Tip.getValue() == *f);
+            doCommand(Doc,"App.activeDocument().%s.removeFeature(App.activeDocument().%s)",
                       source->getNameInDocument(), (*f)->getNameInDocument());
+        }
+
         // Add to target body (always at the Tip)
         doCommand(Doc,"App.activeDocument().%s.addFeature(App.activeDocument().%s)",
                       target->getNameInDocument(), (*f)->getNameInDocument());
@@ -388,14 +393,16 @@ void CmdPartDesignMoveFeature::activated(int iMsg)
             // If we removed the tip of the source body, make the new tip visible
             if (featureIsTip) {
                 App::DocumentObject* prevSolidFeature = source->getPrevSolidFeature();
-                doCommand(Gui,"Gui.activeDocument().show(\"%s\")", prevSolidFeature->getNameInDocument());
+                if (prevSolidFeature) {
+                    doCommand(Gui,"Gui.activeDocument().show(\"%s\")", prevSolidFeature->getNameInDocument());
+                }
             }
 
             // Hide old tip and show new tip (the moved feature) of the target body
             App::DocumentObject* prevSolidFeature = target->getPrevSolidFeature();
             doCommand(Gui,"Gui.activeDocument().hide(\"%s\")", prevSolidFeature->getNameInDocument());
             doCommand(Gui,"Gui.activeDocument().show(\"%s\")", (*f)->getNameInDocument());
-        }
+        }  
     }
 }
 
