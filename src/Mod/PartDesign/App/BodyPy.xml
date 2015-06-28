@@ -23,5 +23,26 @@
                     <UserDocu>removeFeature(feat) - Remove the given feature from the Body</UserDocu>
             </Documentation>
     </Methode>
+    <Methode Name="insertFeatureAfter">
+            <Documentation>
+                    <UserDocu>insertFeatureAfter(feature, after)
+                        Insert the feature into the body after the given feature.
+                        @param feature  The feature to insert into the body
+                        @param after    The feature after the given one should be inserted.
+                                        If after is None than insert the feature as first.
+                    </UserDocu>
+            </Documentation>
+    </Methode>
+    <Methode Name="insertFeatureBefore">
+            <Documentation>
+                    <UserDocu>insertFeatureBefore(feature, before)
+                        Insert the feature into the body before the given feature.
+                        @param feature  The feature to insert into the body
+                        @param before   The feature before the given one should be inserted.
+                                        If before is None than insert the feature as last.
+                        Note: the methode doesn't modifies the Tip
+                    </UserDocu>
+            </Documentation>
+    </Methode>
   </PythonExport>
 </GenerateModel>
