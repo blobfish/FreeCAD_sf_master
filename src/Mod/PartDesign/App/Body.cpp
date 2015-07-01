@@ -42,6 +42,7 @@
 #include <Base/Console.h>
 #include <Mod/Part/App/DatumFeature.h>
 #include <Mod/Part/App/PartFeature.h>
+#include <Mod/Sketcher/App/SketchObject.h>
 
 
 using namespace PartDesign;
@@ -224,7 +225,7 @@ const bool Body::isAllowed(const App::DocumentObject* f)
     // TODO: Should we introduce a PartDesign::FeaturePython class? This should then also return true for isSolidFeature()
     return (f->getTypeId().isDerivedFrom(PartDesign::Feature::getClassTypeId()) ||
             f->getTypeId().isDerivedFrom(Part::Datum::getClassTypeId())   ||
-            f->getTypeId().isDerivedFrom(Part::Part2DObject::getClassTypeId()) ||
+            f->getTypeId().isDerivedFrom(Sketcher::SketchObject::getClassTypeId()) ||
             //f->getTypeId().isDerivedFrom(Part::FeaturePython::getClassTypeId()) // trouble with this line on Windows!? Linker fails to find getClassTypeId() of the Part::FeaturePython...
             f->getTypeId().isDerivedFrom(Part::Feature::getClassTypeId())
             );
