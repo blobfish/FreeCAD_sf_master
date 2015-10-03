@@ -1,11 +1,9 @@
 #ifndef DBUSSERVER_IMPL
 #define DBUSSERVER_IMPL
 
-#include <Mod/OCCDevelop/Gui/PreCompiled.h>
 #include <QObject>
+
 #include <TopAbs_ShapeEnum.hxx>
-#include <TopoDS_Shape.hxx>
-#include <Mod/Part/App/PartFeature.h>
 
 class DBusServerImpl : public QObject
 {
@@ -21,8 +19,6 @@ public Q_SLOTS:
 
 private:
     TopAbs_ShapeEnum nextSubType(TopAbs_ShapeEnum type);
-    void dumpShapeRecursive(TopoDS_Shape shape, QString namePrefix, TopAbs_ShapeEnum stop = TopAbs_VERTEX);
-    Part::TopoShape shapeFromString(QString data);
 };
 
 

@@ -11,6 +11,17 @@
 #include "dbusserver.h"
 
 
+static Part::TopoShape shapeFromString(QString data)
+{
+    std::string buffer = data.toStdString();
+    std::istringstream stream;
+    stream.str(buffer);
+
+    Part::TopoShape shape;
+    shape.importBrep(stream);
+    return shape;
+}
+
 DBusServerImpl::DBusServerImpl(QObject *parent) : QObject(parent)
 {
 
@@ -49,17 +60,6 @@ void DBusServerImpl::addBrep(const QString &docname, const QString &objectname, 
         return;
     object->Shape.setValue(shape);
     currentDoc->recompute();
-}
-
-Part::TopoShape DBusServerImpl::shapeFromString(QString data)
-{
-    std::string buffer = data.toStdString();
-    std::istringstream stream;
-    stream.str(buffer);
-
-    Part::TopoShape shape;
-    shape.importBrep(stream);
-    return shape;
 }
 
 void DBusServerImpl::disectBrep(const QString &objectName, const QString &data)
