@@ -31,10 +31,11 @@
 # define PartDesignExport __declspec(dllexport)
 # define PartExport  __declspec(dllimport)
 # define MeshExport     __declspec(dllimport)
+# define SketcherExport     __declspec(dllimport)
 #else // for Linux
 # define PartDesignExport
 # define PartExport 
-# define MeshExport   
+# define SketcherExport
 #endif
 
 #ifdef _PreComp_
