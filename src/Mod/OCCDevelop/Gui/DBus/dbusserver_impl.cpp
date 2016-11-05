@@ -70,6 +70,6 @@ void DBusServerImpl::disectBrep(const QString &objectName, const QString &data)
         return;
     App::DocumentObjectGroup *group = static_cast<App::DocumentObjectGroup *>
             (currentDoc->addObject("App::DocumentObjectGroup", objectName.toAscii().data()));
-    DisectBrep::disectBrepRecursive(group, shape._Shape, TopoDS_Shape(), 1);
+    DisectBrep::disectBrepRecursive(group, shape.getShape(), TopoDS_Shape(), 1);
 }
 
