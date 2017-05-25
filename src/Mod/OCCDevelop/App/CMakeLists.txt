@@ -7,6 +7,8 @@ include_directories(
     ${XERCESC_INCLUDE_DIR}
 )
 
+link_directories(${OCC_LIBRARY_DIR})
+
 set(OCCDevelop_LIBS
     FreeCADApp
 )
