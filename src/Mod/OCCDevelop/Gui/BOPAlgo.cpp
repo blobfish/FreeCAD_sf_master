@@ -40,8 +40,6 @@
 
 #include "BOPAlgo.h"
 
-typedef std::vector<TopoDS_Shape, Standard_StdAllocator<TopoDS_Shape> > ShapeVector;
-
 static std::string shapeText(TopAbs_ShapeEnum shapeType)
 {
     static std::vector<std::string> names
@@ -68,7 +66,7 @@ static void addFeature(const std::string &nameIn, const TopoDS_Shape &shapeIn)
   feature->Shape.setValue(shapeIn);
 }
 
-static TopoDS_Compound buildCompound(const ShapeVector& shapesIn)
+static TopoDS_Compound buildCompound(const OCCDevelop::ShapeVector& shapesIn)
 {
   BRep_Builder builder;
   TopoDS_Compound out;
@@ -78,7 +76,7 @@ static TopoDS_Compound buildCompound(const ShapeVector& shapesIn)
   return out;
 }
 
-void OCCDevelop::BOPAlgo(const TopoDS_Shape& shape1In, const TopoDS_Shape& shape2In)
+void OCCDevelop::BOPAlgo(const OCCDevelop::ShapeVector &ssIn)
 {
   //when splitting edges we will have to compare the number of output edges to
   //the input edges too see if the operation did anything.
@@ -88,20 +86,17 @@ void OCCDevelop::BOPAlgo(const TopoDS_Shape& shape1In, const TopoDS_Shape& shape
   
   try
   {
-    BRepBuilderAPI_Copy copier;
-    copier.Perform(shape1In);
-    TopoDS_Shape copy1 = copier.Shape();
-    copier.Perform(shape2In);
-    TopoDS_Shape copy2 = copier.Shape();
-    
     BOPAlgo_Builder bopBuilder;
-    bopBuilder.AddArgument(copy1);
-    bopBuilder.AddArgument(copy2);
+    for (const auto &s : ssIn)
+      bopBuilder.AddArgument(s);
+
     bopBuilder.Perform();
-    if (bopBuilder.ErrorStatus())
+    if (bopBuilder.HasErrors())
     {
       std::ostringstream error;
-      error << "error with bopBuilder. error code: " << bopBuilder.ErrorStatus() << std::endl;
+      error << "error with bopBuilder. error code: "
+      << std::endl;
+      bopBuilder.DumpErrors(error);
       throw std::runtime_error(error.str());
     }
     
@@ -110,25 +105,23 @@ void OCCDevelop::BOPAlgo(const TopoDS_Shape& shape1In, const TopoDS_Shape& shape
     for (int index = 0; imageIt.More(); imageIt.Next(), index++)
     {
       const TopoDS_Shape &key = imageIt.Key();
-      
-      const BOPCol_ListOfShape &shapeList = imageIt.Value();
-      BOPCol_ListOfShape::Iterator shapeListIt(shapeList);
-      ShapeVector mappedVector;
-      for (;shapeListIt.More();shapeListIt.Next())
-        mappedVector.push_back(shapeListIt.Value());
-      //I have verified that shapetype of key equals all shapetype of all the objects in shapeList.
-      //meaning if the key is of type face, then shapelist only contains faces.
-      
       std::ostringstream keyBase;
       keyBase << "Output_Images_key_" << ((index < 10) ? "0" : "") << index;
       std::ostringstream keyName;
       keyName << keyBase.str() << "_source_shapetype:" << shapeText(key.ShapeType());
-      
-      std::ostringstream mappedName;
-      mappedName << keyBase.str() << "_result_count_" << mappedVector.size();
-      
       addFeature(keyName.str(), key);
-      addFeature(mappedName.str(), buildCompound(mappedVector));
+      
+      int count = 0;
+      for (const auto &sil : imageIt.Value()) //shape in list
+      {
+        count++;
+        assert(key.ShapeType() == sil.ShapeType());
+        
+        std::ostringstream mappedName;
+        mappedName << keyBase.str() << "_result_shape_" << ((count < 10) ? "0" : "") << count;
+        
+        addFeature(mappedName.str(), sil);
+      }
     }
     
     //it appears splits only contain faces that have been split. It ignores edges.
@@ -137,46 +130,48 @@ void OCCDevelop::BOPAlgo(const TopoDS_Shape& shape1In, const TopoDS_Shape& shape
     for (int index = 0; splitIt.More(); splitIt.Next(), index++)
     {
       const TopoDS_Shape &key = splitIt.Key();
-      
-      const BOPCol_ListOfShape &shapeList = splitIt.Value();
-      BOPCol_ListOfShape::Iterator shapeListIt(shapeList);
-      ShapeVector mappedVector;
-      for (;shapeListIt.More();shapeListIt.Next())
-        mappedVector.push_back(shapeListIt.Value());
-      //I have verified that shapetype of key equals all shapetype of all the objects in shapeList.
-      //meaning if the key is of type face, then shapelist only contains faces.
-      
       std::ostringstream keyBase;
       keyBase << "Output_Splits_key_" << ((index < 10) ? "0" : "") << index;
       std::ostringstream keyName;
       keyName << keyBase.str() << "_source_shapetype:" << shapeText(key.ShapeType());
-      
-      std::ostringstream mappedName;
-      mappedName << keyBase.str() << "_result_count_" << mappedVector.size();
-      
       addFeature(keyName.str(), key);
-      addFeature(mappedName.str(), buildCompound(mappedVector));
+      
+      int count = 0;
+      for (const auto &sil : splitIt.Value()) //shape in list
+      {
+        count++;
+        assert(key.ShapeType() == sil.ShapeType());
+        
+        std::ostringstream mappedName;
+        mappedName << keyBase.str() << "_result_shape_" << ((count < 10) ? "0" : "") << count;
+        
+        addFeature(mappedName.str(), sil);
+      }
     }
     
     //origins. the keys are the new shapes and the mapped are the originals.
     //allows to trace resultant geometry to source geometry. ignores at least compounds and wires.
-    const BOPCol_DataMapOfShapeShape &origins = bopBuilder.Origins();
-    BOPCol_DataMapOfShapeShape::Iterator originIt(origins);
+    const BOPCol_DataMapOfShapeListOfShape &origins = bopBuilder.Origins();
+    BOPCol_DataMapOfShapeListOfShape::Iterator originIt(origins);
     for (int index = 0; originIt.More(); originIt.Next(), index++)
     {
       const TopoDS_Shape &key = originIt.Key();
-      const TopoDS_Shape &mapped = origins(key);
-      assert(key.ShapeType() == mapped.ShapeType());
-      
       std::ostringstream keyBase;
       keyBase << "Output_Origins_key_" << ((index < 10) ? "0" : "") << index;
       std::ostringstream keyName;
       keyName << keyBase.str() << "_source_shapetype:" << shapeText(key.ShapeType());
-      std::ostringstream mappedName;
-      mappedName << keyBase.str() << "_result_shape";
-      
-      addFeature(keyName.str(),key);
-      addFeature(mappedName.str(), mapped);
+      addFeature(keyName.str(), key);
+      int mappedCount = 0;
+      for (const auto &sil : origins(key)) //shape in list
+      {
+        assert(key.ShapeType() == sil.ShapeType());
+        
+        std::ostringstream mappedName;
+        mappedName << keyBase.str() << "_result_shape_" << ((mappedCount < 10) ? "0" : "") << mappedCount;
+        
+        addFeature(mappedName.str(), sil);
+        mappedCount++;
+      }
     }
     
     //shapesSD. This is empty for the 2 face intersect.
@@ -199,125 +194,101 @@ void OCCDevelop::BOPAlgo(const TopoDS_Shape& shape1In, const TopoDS_Shape& shape
       addFeature(mappedName.str(), mapped);
     }
     
-    //Generated for input 1. This is empty for the 2 face intersect.
-    TopTools_IndexedMapOfShape inputShape1Map, inputShape2Map;
-    TopExp::MapShapes(copy1, inputShape1Map);
-    TopExp::MapShapes(copy2, inputShape2Map);
-    for (int index = 1; index <= inputShape1Map.Extent(); ++index)
+    int count = 0;
+    //Generated for inputs. This was empty for the 2 face intersect.
+    //I didn't update this as it produces nothing at this time occt 7.2
+    for (const auto &s : ssIn)
     {
-      const TopoDS_Shape &key = inputShape1Map.FindKey(index);
-      const TopTools_ListOfShape &generated = bopBuilder.Generated(key);
-      if (generated.IsEmpty())
-        continue;
-      
-      ShapeVector mappedVector;
-      TopTools_ListIteratorOfListOfShape listIt(generated);
-      for (;listIt.More();listIt.Next())
+      count++;
+      TopTools_IndexedMapOfShape inputShapeMap;
+      TopExp::MapShapes(s, inputShapeMap);
+      for (int index = 1; index <= inputShapeMap.Extent(); ++index)
       {
-        mappedVector.push_back(listIt.Value());
-        assert(listIt.Value().ShapeType() == key.ShapeType());
+        const TopoDS_Shape &key = inputShapeMap.FindKey(index);
+        const TopTools_ListOfShape &generated = bopBuilder.Generated(key);
+        if (generated.IsEmpty())
+          continue;
+        
+        ShapeVector mappedVector;
+        TopTools_ListIteratorOfListOfShape listIt(generated);
+        for (;listIt.More();listIt.Next())
+        {
+          mappedVector.push_back(listIt.Value());
+          assert(listIt.Value().ShapeType() == key.ShapeType());
+        }
+        
+        std::ostringstream keyBase;
+        keyBase << "Output_Generated_base" << count << "_Shape" << ((index < 10) ? "0" : "") << index;
+        std::ostringstream keyName;
+        keyName << keyBase.str() << "_source_shapetype:" << shapeText(key.ShapeType());
+        
+        std::ostringstream mappedName;
+        mappedName << keyBase.str() << "_result_count_" << mappedVector.size();
+        
+        addFeature(keyName.str(), key);
+        addFeature(mappedName.str(), buildCompound(mappedVector));
       }
-      
-      std::ostringstream keyBase;
-      keyBase << "Output_Generated_base1_" << ((index < 10) ? "0" : "") << index;
-      std::ostringstream keyName;
-      keyName << keyBase.str() << "_source_shapetype:" << shapeText(key.ShapeType());
-      
-      std::ostringstream mappedName;
-      mappedName << keyBase.str() << "_result_count_" << mappedVector.size();
-      
-      addFeature(keyName.str(), key);
-      addFeature(mappedName.str(), buildCompound(mappedVector));
-    }
-    
-    //Generated for input 2. This is empty for the 2 face intersect.
-    for (int index = 1; index <= inputShape2Map.Extent(); ++index)
-    {
-      const TopoDS_Shape &key = inputShape2Map.FindKey(index);
-      const TopTools_ListOfShape &generated = bopBuilder.Generated(key);
-      if (generated.IsEmpty())
-        continue;
-      
-      ShapeVector mappedVector;
-      TopTools_ListIteratorOfListOfShape listIt(generated);
-      for (;listIt.More();listIt.Next())
-      {
-        mappedVector.push_back(listIt.Value());
-        assert(listIt.Value().ShapeType() == key.ShapeType());
-      }
-      
-      std::ostringstream keyBase;
-      keyBase << "Output_Generated_base2_" << ((index < 10) ? "0" : "") << index;
-      std::ostringstream keyName;
-      keyName << keyBase.str() << "_source_shapetype:" << shapeText(key.ShapeType());
-      
-      std::ostringstream mappedName;
-      mappedName << keyBase.str() << "_result_count_" << mappedVector.size();
-      
-      addFeature(keyName.str(), key);
-      addFeature(mappedName.str(), buildCompound(mappedVector));
     }
     
     //Modified for input 1. ignores at least compounds, shells and wires.
-    for (int index = 1; index <= inputShape1Map.Extent(); ++index)
+    count = 0;
+    for (const auto &s : ssIn)
     {
-      const TopoDS_Shape &key = inputShape1Map.FindKey(index);
-      const TopTools_ListOfShape &generated = bopBuilder.Modified(key);
-      if (generated.IsEmpty())
-        continue;
-      
-      ShapeVector mappedVector;
-      TopTools_ListIteratorOfListOfShape listIt(generated);
-      for (;listIt.More();listIt.Next())
+      count++;
+      TopTools_IndexedMapOfShape inputShapeMap;
+      TopExp::MapShapes(s, inputShapeMap);
+      for (int index = 1; index <= inputShapeMap.Extent(); ++index)
       {
-        mappedVector.push_back(listIt.Value());
-        assert(listIt.Value().ShapeType() == key.ShapeType());
+        const TopoDS_Shape &key = inputShapeMap.FindKey(index);
+        const TopTools_ListOfShape &modified = bopBuilder.Modified(key);
+        if (modified.IsEmpty())
+          continue;
+        std::ostringstream keyBase;
+        keyBase << "Output_Modified_base" << count << "_Shape" << ((index < 10) ? "0" : "") << index;
+        std::ostringstream keyName;
+        keyName << keyBase.str() << "_source_shapetype:" << shapeText(key.ShapeType());
+        addFeature(keyName.str(), key);
+        
+        
+        
+        int count = 0;
+        for (const auto &sil : modified) //shape in list
+        {
+          count++;
+          assert(key.ShapeType() == sil.ShapeType());
+          
+          std::ostringstream mappedName;
+          mappedName << keyBase.str() << "_result_shape_" << ((count < 10) ? "0" : "") << count;
+          
+          addFeature(mappedName.str(), sil);
+        }
       }
-      
-      std::ostringstream keyBase;
-      keyBase << "Output_Modified_base1_" << ((index < 10) ? "0" : "") << index;
-      std::ostringstream keyName;
-      keyName << keyBase.str() << "_source_shapetype:" << shapeText(key.ShapeType());
-      
-      std::ostringstream mappedName;
-      mappedName << keyBase.str() << "_result_count_" << mappedVector.size();
-      
-      addFeature(keyName.str(), key);
-      addFeature(mappedName.str(), buildCompound(mappedVector));
     }
     
-    //Modified for input 2. ignores at least compounds, shells and wires.
-    for (int index = 1; index <= inputShape2Map.Extent(); ++index)
+    //IsDeleted for inputs.
+    count = 0;
+    for (const auto &s : ssIn)
     {
-      const TopoDS_Shape &key = inputShape2Map.FindKey(index);
-      const TopTools_ListOfShape &generated = bopBuilder.Modified(key);
-      if (generated.IsEmpty())
-        continue;
-      
-      ShapeVector mappedVector;
-      TopTools_ListIteratorOfListOfShape listIt(generated);
-      for (;listIt.More();listIt.Next())
+      count++;
+      TopTools_IndexedMapOfShape inputShapeMap;
+      TopExp::MapShapes(s, inputShapeMap);
+      for (int index = 1; index <= inputShapeMap.Extent(); ++index)
       {
-        mappedVector.push_back(listIt.Value());
-        assert(listIt.Value().ShapeType() == key.ShapeType());
+        const TopoDS_Shape &key = inputShapeMap.FindKey(index);
+        if (!bopBuilder.IsDeleted(key))
+          continue;
+        
+        std::ostringstream keyBase;
+        keyBase << "Input_Deleted_base" << count << "_Shape" << ((index < 10) ? "0" : "") << index;
+        keyBase << "_shapetype:" << shapeText(key.ShapeType());
+        
+        addFeature(keyBase.str(), key);
       }
-      
-      std::ostringstream keyBase;
-      keyBase << "Output_Modified_base2_" << ((index < 10) ? "0" : "") << index;
-      std::ostringstream keyName;
-      keyName << keyBase.str() << "_source_shapetype:" << shapeText(key.ShapeType());
-      
-      std::ostringstream mappedName;
-      mappedName << keyBase.str() << "_result_count_" << mappedVector.size();
-      
-      addFeature(keyName.str(), key);
-      addFeature(mappedName.str(), buildCompound(mappedVector));
     }
   }
-  catch (Standard_Failure)
+  catch (const Standard_Failure &e)
   {
-    Handle_Standard_Failure e = Standard_Failure::Caught();
-    std::cout << "OCC Error: " << e->GetMessageString() << std::endl;
+    std::cout << "OCC Error: " << e.GetMessageString() << std::endl;
   }
   catch (const std::exception &error)
   {

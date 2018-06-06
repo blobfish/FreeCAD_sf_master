@@ -206,24 +206,22 @@ CmdOCCDevelopBOPAlgo::CmdOCCDevelopBOPAlgo()
 void CmdOCCDevelopBOPAlgo::activated(int iMsg)
 {
     std::vector<Gui::SelectionSingleton::SelObj> objects = Gui::SelectionSingleton::instance().getSelection();
-    if (objects.size() < 2)
-        return;
-
-    Part::Feature *feature1 = dynamic_cast<Part::Feature *>(objects.at(0).pObject);
-    assert(feature1);
-    TopoDS_Shape shape1 = feature1->Shape.getValue();
-    if (strlen(objects.at(0).SubName) > 0)
-        shape1 = feature1->Shape.getShape().getSubShape(objects.at(0).SubName);
-    assert(!shape1.IsNull());
+    OCCDevelop::ShapeVector shapes;
+    for (const auto &selObj : objects)
+    {
+      Part::Feature *feature = dynamic_cast<Part::Feature *>(selObj.pObject);
+      assert(feature);
+      TopoDS_Shape shape = feature->Shape.getValue();
+      if (strlen(selObj.SubName) > 0)
+          shape = feature->Shape.getShape().getSubShape(selObj.SubName);
+      if (!shape.IsNull())
+        shapes.push_back(shape);
+    }
     
-    Part::Feature *feature2 = dynamic_cast<Part::Feature *>(objects.at(1).pObject);
-    assert(feature2);
-    TopoDS_Shape shape2 = feature2->Shape.getValue();
-    if (strlen(objects.at(1).SubName) > 0)
-      shape2 = feature2->Shape.getShape().getSubShape(objects.at(1).SubName);
-    assert(!shape2.IsNull());
+    if (shapes.size() < 2)
+      return;
     
-    OCCDevelop::BOPAlgo(shape1, shape2);
+    OCCDevelop::BOPAlgo(shapes);
 }
 
 void CreateOCCDevelopCommands(void)

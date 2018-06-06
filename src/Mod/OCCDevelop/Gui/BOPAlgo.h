@@ -20,11 +20,14 @@
 #ifndef BOPALGO_H
 #define BOPALGO_H
 
+#include <Standard_StdAllocator.hxx>
+
 class TopoDS_Shape;
 
 namespace OCCDevelop
 {
-  void BOPAlgo(const TopoDS_Shape &shape1In, const TopoDS_Shape &shape2In);
+  typedef std::vector<TopoDS_Shape, Standard_StdAllocator<TopoDS_Shape> > ShapeVector;
+  void BOPAlgo(const ShapeVector&);
 }
 
 #endif // BOPALGO_H
